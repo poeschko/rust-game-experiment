@@ -5,3 +5,6 @@ authors = ["Jan Poeschko <jan@poeschko.com>"]
 
 [dependencies]
 ggez = "0.4.2"
+nalgebra = "0.11.0"
+ncollide = "0.11.0"
+nphysics2d = "0.6.0"
