@@ -5,7 +5,7 @@ extern crate nphysics2d;
 
 use ggez::{ContextBuilder, Context, GameResult};
 use ggez::conf::{WindowSetup};
-use ggez::event::{self, EventHandler};
+use ggez::event::{self, EventHandler, Keycode, Mod};
 use ggez::graphics::{clear, circle, line, present, DrawMode, Point2};
 use ggez::timer;
 
@@ -26,7 +26,8 @@ impl MainState {
         floor.append_translation(&Translation2::new(0.0, 400.0));
         world.add_rigid_body(floor);
         let mut player = RigidBody::new_dynamic(Ball::new(10.0), 1.0, 0.3, 0.6);
-        player.append_translation(&Translation2::new(30.0, 200.0));
+        player.set_inv_mass(1.0);
+        player.append_translation(&Translation2::new(300.0, 200.0));
         let player = world.add_rigid_body(player);
         let s = MainState { world, player };
         Ok(s)
@@ -44,9 +45,37 @@ impl EventHandler for MainState {
         clear(ctx);
         let pos = self.player.borrow().position_center();
         circle(ctx, DrawMode::Fill, Point2::new(pos.x, pos.y), 10.0, 0.5)?;
-        line(ctx, &[Point2::new(0.0, 400.0), Point2::new(800.0, 400.0)], 1.0);
+        line(ctx, &[Point2::new(0.0, 400.0), Point2::new(800.0, 400.0)], 1.0)?;
         present(ctx);
         Ok(())
+    }
+    fn key_down_event(&mut self, _ctx: &mut Context, keycode: Keycode, _keymod: Mod, repeat: bool) {
+        if !repeat {
+            let mut player = self.player.borrow_mut();
+            match keycode {
+                Keycode::Left => {
+                    player.apply_central_impulse(Vector2::new(-100.0, 0.0));
+                }
+                Keycode::Right => {
+                    player.apply_central_impulse(Vector2::new(100.0, 0.0));
+                }
+                _ =>()
+            }
+        }
+    }
+    fn key_up_event(&mut self, _ctx: &mut Context, keycode: Keycode, _keymod: Mod, repeat: bool) {
+        if !repeat {
+            let mut player = self.player.borrow_mut();
+            match keycode {
+                Keycode::Left => {
+                    player.apply_central_impulse(Vector2::new(100.0, 0.0));
+                }
+                Keycode::Right => {
+                    player.apply_central_impulse(Vector2::new(-100.0, 0.0));
+                }
+                _ =>()
+            }
+        }
     }
 }
 pub fn main() {
