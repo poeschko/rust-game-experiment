@@ -6,7 +6,7 @@ extern crate nphysics2d;
 use ggez::{ContextBuilder, Context, GameResult};
 use ggez::conf::{WindowSetup};
 use ggez::event::{self, EventHandler};
-use ggez::graphics::{clear, circle, present, DrawMode, Point2};
+use ggez::graphics::{clear, circle, line, present, DrawMode, Point2};
 use ggez::timer;
 
 use na::{Vector2, Translation2};
@@ -44,6 +44,7 @@ impl EventHandler for MainState {
         clear(ctx);
         let pos = self.player.borrow().position_center();
         circle(ctx, DrawMode::Fill, Point2::new(pos.x, pos.y), 10.0, 0.5)?;
+        line(ctx, &[Point2::new(0.0, 400.0), Point2::new(800.0, 400.0)], 1.0);
         present(ctx);
         Ok(())
     }
