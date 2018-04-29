@@ -23,7 +23,7 @@ struct MainState {
 impl MainState {
     fn new(_ctx: &mut Context) -> GameResult<MainState> {
         let mut world = World::new();
-        world.set_gravity(Vector2::new(0.0, 100.0));
+        world.set_gravity(Vector2::new(0.0, 300.0));
         let mut floor = RigidBody::new_static(Plane::new(Vector2::new(0.0, -1.0)), 0.0, 0.0);
         floor.append_translation(&Translation2::new(0.0, 400.0));
         world.add_rigid_body(floor);
@@ -70,6 +70,12 @@ impl EventHandler for MainState {
                 }
                 Keycode::Right => {
                     self.right_down = true;
+                }
+                Keycode::Space => {
+                    let mut player: std::cell::RefMut<RigidBody<f32>> = self.player.borrow_mut();
+                    if player.position_center().y + 10.0 > 399.5 {
+                        player.apply_central_impulse(Vector2::new(0.0, -150.0));
+                    }
                 }
                 _ => ()
             }
