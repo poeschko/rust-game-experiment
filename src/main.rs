@@ -23,11 +23,11 @@ struct MainState {
 impl MainState {
     fn new(_ctx: &mut Context) -> GameResult<MainState> {
         let mut world = World::new();
-        world.set_gravity(Vector2::new(0.0, 9.81));
-        let mut floor = RigidBody::new_static(Plane::new(Vector2::new(0.0, -1.0)), 0.3, 0.6);
+        world.set_gravity(Vector2::new(0.0, 100.0));
+        let mut floor = RigidBody::new_static(Plane::new(Vector2::new(0.0, -1.0)), 0.0, 0.0);
         floor.append_translation(&Translation2::new(0.0, 400.0));
         world.add_rigid_body(floor);
-        let mut player = RigidBody::new_dynamic(Ball::new(10.0), 1.0, 0.3, 0.6);
+        let mut player = RigidBody::new_dynamic(Ball::new(10.0), 1.0, 0.0, 0.0);
         player.set_inv_mass(1.0);
         player.append_translation(&Translation2::new(300.0, 200.0));
         let player = world.add_rigid_body(player);
@@ -71,7 +71,7 @@ impl EventHandler for MainState {
                 Keycode::Right => {
                     self.right_down = true;
                 }
-                _ =>()
+                _ => ()
             }
             self.refresh_horizontal_vel();
         }
@@ -85,7 +85,7 @@ impl EventHandler for MainState {
                 Keycode::Right => {
                     self.right_down = false;
                 }
-                _ =>()
+                _ => ()
             }
             self.refresh_horizontal_vel();
         }
