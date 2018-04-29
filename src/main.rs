@@ -4,7 +4,7 @@ extern crate ncollide;
 extern crate nphysics2d;
 
 use ggez::{ContextBuilder, Context, GameResult};
-use ggez::conf::{WindowSetup};
+use ggez::conf::{WindowMode, WindowSetup};
 use ggez::event::{self, EventHandler, Keycode, Mod};
 use ggez::graphics::{clear, circle, line, present, DrawMode, Point2};
 use ggez::timer;
@@ -13,6 +13,11 @@ use na::{Vector2, Translation2};
 use ncollide::shape::{Ball, Plane};
 use nphysics2d::world::World;
 use nphysics2d::object::{RigidBody, RigidBodyHandle};
+
+const WINDOW_WIDTH: u32 = 800;
+const WINDOW_HEIGHT: u32 = 600;
+const PLAYER_R: f32 = 10.0;
+const FLOOR_Y: f32 = 400.0;
 
 struct MainState {
     world: World<f32>,
@@ -25,9 +30,9 @@ impl MainState {
         let mut world = World::new();
         world.set_gravity(Vector2::new(0.0, 300.0));
         let mut floor = RigidBody::new_static(Plane::new(Vector2::new(0.0, -1.0)), 0.0, 0.0);
-        floor.append_translation(&Translation2::new(0.0, 400.0));
+        floor.append_translation(&Translation2::new(0.0, FLOOR_Y));
         world.add_rigid_body(floor);
-        let mut player = RigidBody::new_dynamic(Ball::new(10.0), 1.0, 0.0, 0.0);
+        let mut player = RigidBody::new_dynamic(Ball::new(PLAYER_R), 1.0, 0.0, 0.0);
         player.set_inv_mass(1.0);
         player.append_translation(&Translation2::new(300.0, 200.0));
         let player = world.add_rigid_body(player);
@@ -57,8 +62,8 @@ impl EventHandler for MainState {
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         clear(ctx);
         let pos = self.player.borrow().position_center();
-        circle(ctx, DrawMode::Fill, Point2::new(pos.x, pos.y), 10.0, 0.5)?;
-        line(ctx, &[Point2::new(0.0, 400.0), Point2::new(800.0, 400.0)], 1.0)?;
+        circle(ctx, DrawMode::Fill, Point2::new(pos.x, pos.y), PLAYER_R, 0.1)?;
+        line(ctx, &[Point2::new(0.0, FLOOR_Y), Point2::new(WINDOW_WIDTH as f32, FLOOR_Y)], 1.0)?;
         present(ctx);
         Ok(())
     }
@@ -73,7 +78,7 @@ impl EventHandler for MainState {
                 }
                 Keycode::Space => {
                     let mut player: std::cell::RefMut<RigidBody<f32>> = self.player.borrow_mut();
-                    if player.position_center().y + 10.0 > 399.5 {
+                    if player.position_center().y + PLAYER_R > FLOOR_Y - 0.1 {
                         player.apply_central_impulse(Vector2::new(0.0, -150.0));
                     }
                 }
@@ -100,7 +105,8 @@ impl EventHandler for MainState {
 }
 pub fn main() {
     let cb = ContextBuilder::new("rust-game-experiment", "ggez")
-        .window_setup(WindowSetup::default().title("My first Rust game"));
+        .window_setup(WindowSetup::default().title("My first Rust game"))
+        .window_mode(WindowMode::default().dimensions(WINDOW_WIDTH, WINDOW_HEIGHT));
     let ctx = &mut cb.build().unwrap();
     println!();
     println!();
