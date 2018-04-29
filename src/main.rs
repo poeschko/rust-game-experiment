@@ -17,6 +17,8 @@ use nphysics2d::object::{RigidBody, RigidBodyHandle};
 struct MainState {
     world: World<f32>,
     player: RigidBodyHandle<f32>,
+    left_down: bool,
+    right_down: bool,
 }
 impl MainState {
     fn new(_ctx: &mut Context) -> GameResult<MainState> {
@@ -29,8 +31,19 @@ impl MainState {
         player.set_inv_mass(1.0);
         player.append_translation(&Translation2::new(300.0, 200.0));
         let player = world.add_rigid_body(player);
-        let s = MainState { world, player };
+        let s = MainState { world, player, left_down: false, right_down: false };
         Ok(s)
+    }
+    fn refresh_horizontal_vel(&mut self) {
+        let mut player: std::cell::RefMut<RigidBody<f32>> = self.player.borrow_mut();
+        let current = player.lin_vel();
+        let mut dir = 0.0;
+        if self.left_down && !self.right_down {
+            dir = -1.0;
+        } else if self.right_down && !self.left_down{
+            dir = 1.0;
+        }
+        player.set_lin_vel(Vector2::new(dir * 100.0, current.y));
     }
 }
 impl EventHandler for MainState {
@@ -51,32 +64,33 @@ impl EventHandler for MainState {
     }
     fn key_down_event(&mut self, _ctx: &mut Context, keycode: Keycode, _keymod: Mod, repeat: bool) {
         if !repeat {
-            let mut player = self.player.borrow_mut();
             match keycode {
                 Keycode::Left => {
-                    player.apply_central_impulse(Vector2::new(-100.0, 0.0));
+                    self.left_down = true;
                 }
                 Keycode::Right => {
-                    player.apply_central_impulse(Vector2::new(100.0, 0.0));
+                    self.right_down = true;
                 }
                 _ =>()
             }
+            self.refresh_horizontal_vel();
         }
     }
     fn key_up_event(&mut self, _ctx: &mut Context, keycode: Keycode, _keymod: Mod, repeat: bool) {
         if !repeat {
-            let mut player = self.player.borrow_mut();
             match keycode {
                 Keycode::Left => {
-                    player.apply_central_impulse(Vector2::new(100.0, 0.0));
+                    self.left_down = false;
                 }
                 Keycode::Right => {
-                    player.apply_central_impulse(Vector2::new(-100.0, 0.0));
+                    self.right_down = false;
                 }
                 _ =>()
             }
+            self.refresh_horizontal_vel();
         }
     }
+
 }
 pub fn main() {
     let cb = ContextBuilder::new("rust-game-experiment", "ggez")
